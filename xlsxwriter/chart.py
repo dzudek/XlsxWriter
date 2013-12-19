@@ -584,6 +584,8 @@ class Chart(xmlwriter.XMLwriter):
             'major_unit': options.get('major_unit'),
             'minor_unit_type': options.get('minor_unit_type'),
             'major_unit_type': options.get('major_unit_type'),
+            'major_tick_mark': options.get('major_tick_mark'),
+            'minor_tick_mark': options.get('minor_tick_mark'),
             'log_base': options.get('log_base'),
             'crossing': options.get('crossing'),
             'position_axis': options.get('position_axis'),
@@ -1627,6 +1629,9 @@ class Chart(xmlwriter.XMLwriter):
         # Write the c:majorTickMark element.
         self._write_major_tick_mark(x_axis.get('major_tick_mark'))
 
+        # Write the c:minorTickMark element.
+        self._write_minor_tick_mark(x_axis.get('minor_tick_mark'))
+
         # Write the c:tickLblPos element.
         self._write_tick_label_pos(x_axis.get('label_position'))
 
@@ -1719,6 +1724,9 @@ class Chart(xmlwriter.XMLwriter):
         # Write the c:majorTickMark element.
         self._write_major_tick_mark(y_axis.get('major_tick_mark'))
 
+        # Write the c:minorTickMark element.
+        self._write_minor_tick_mark(y_axis.get('minor_tick_mark'))
+
         # Write the c:tickLblPos element.
         self._write_tick_label_pos(y_axis.get('label_position'))
 
@@ -1806,6 +1814,9 @@ class Chart(xmlwriter.XMLwriter):
         # Write the c:majorTickMark element.
         self._write_major_tick_mark(x_axis.get('major_tick_mark'))
 
+        # Write the c:minorTickMark element.
+        self._write_minor_tick_mark(x_axis.get('minor_tick_mark'))
+
         # Write the c:tickLblPos element.
         self._write_tick_label_pos(x_axis.get('label_position'))
 
@@ -1891,6 +1902,9 @@ class Chart(xmlwriter.XMLwriter):
 
         # Write the c:majorTickMark element.
         self._write_major_tick_mark(x_axis.get('major_tick_mark'))
+
+        # Write the c:minorTickMark element.
+        self._write_minor_tick_mark(x_axis.get('minor_tick_mark'))
 
         # Write the c:tickLblPos element.
         self._write_tick_label_pos(x_axis.get('label_position'))
@@ -2073,6 +2087,16 @@ class Chart(xmlwriter.XMLwriter):
         attributes = [('val', val)]
 
         self._xml_empty_tag('c:majorTickMark', attributes)
+
+    def _write_minor_tick_mark(self, val):
+        # Write the <c:minorTickMark> element.
+
+        if not val:
+            return
+
+        attributes = [('val', val)]
+
+        self._xml_empty_tag('c:minorTickMark', attributes)
 
     def _write_tick_label_pos(self, val=None):
         # Write the <c:tickLblPos> element.
