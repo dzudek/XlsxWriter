@@ -49,7 +49,7 @@ class TestCompareXLSXFiles(unittest.TestCase):
         worksheet.write('A1', 'Foo', bold)
         worksheet.write('A2', 'Bar', italic)
 
-        worksheet.write_rich_string('A3', "This is\r\n", bold, "bold\r\n", "and this is\r\n", italic, 'italic', wrap)
+        worksheet.write_rich_string('A3', "This is\n", bold, "bold\n", "and this is\n", italic, 'italic', wrap)
 
         workbook.close()
 

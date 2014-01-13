@@ -39,7 +39,7 @@ Here is a simple example:
    worksheet.set_column('A:A', 20)
 
    # Add a bold format to use to highlight cells.
-   bold = workbook.add_format({'bold': 1})
+   bold = workbook.add_format({'bold': True})
 
    # Write some simple text.
    worksheet.write('A1', 'Hello')
@@ -60,5 +60,5 @@ Here is a simple example:
 
 See the full documentation at: http://xlsxwriter.readthedocs.org
 
-Release notes: https://xlsxwriter.readthedocs.org/en/latest/changes.html
+Release notes: http://xlsxwriter.readthedocs.org/changes.html
 
