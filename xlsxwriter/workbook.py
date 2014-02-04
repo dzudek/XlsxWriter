@@ -104,6 +104,8 @@ class Workbook(xmlwriter.XMLwriter):
         self.border_count = 0
         self.fill_count = 0
         self.drawing_count = 0
+        self.calc_mode = "auto"
+        self.calc_on_load = True
 
         # We can't do 'constant_memory' mode while doing 'in_memory' mode.
         if self.in_memory:
@@ -248,6 +250,27 @@ class Workbook(xmlwriter.XMLwriter):
 
         """
         self.doc_properties = properties
+
+    def set_calc_mode(self, mode):
+        """
+        Set the Excel caclcuation mode for the workbook.
+
+        Args:
+            mode: String containing one of:
+                * manual
+                * auto_except_tables
+                * auto
+
+        Returns:
+            Nothing.
+
+        """
+        self.calc_mode = mode
+
+        if mode == 'manual':
+            self.calc_on_load = False
+        elif mode == 'auto_except_tables':
+            self.calc_mode = 'autoNoTable'
 
     def define_name(self, name, formula):
         # Create a defined name in Excel. We handle global/workbook level
@@ -410,11 +433,14 @@ class Workbook(xmlwriter.XMLwriter):
         xlsx_file = ZipFile(self.filename, "w", compression=ZIP_DEFLATED)
 
         # Add XML sub-files to the Zip file with their Excel filename.
-        for os_filename, xml_filename in xml_files:
+        for os_filename, xml_filename, is_binary in xml_files:
             if self.in_memory:
                 # The files are in-memory StringIOs.
-                xlsx_file.writestr(xml_filename,
-                                   os_filename.getvalue().encode('utf-8'))
+                if is_binary:
+                    xlsx_file.writestr(xml_filename, os_filename.getvalue())
+                else:
+                    xlsx_file.writestr(xml_filename,
+                                       os_filename.getvalue().encode('utf-8'))
             else:
                 # The files are tempfiles.
                 xlsx_file.write(os_filename, xml_filename)
@@ -592,23 +618,18 @@ class Workbook(xmlwriter.XMLwriter):
         index = 164
         num_format_count = 0
 
-        is_number = re.compile(r'^\d+$')
-        is_zeroes = re.compile(r'^0+\d')
-
         for xf_format in (self.xf_formats + self.dxf_formats):
             num_format = xf_format.num_format
-            # Check if num_format is an index to a built-in number format.
-            # Also check for a string of zeros, which is a valid number
-            # format string but would evaluate to zero.
 
-            try:
-                if (is_number.match(str(num_format))
-                        and not is_zeroes.match(str(num_format))):
-                    # Index to a built-in number xf_format.
-                    xf_format.num_format_index = int(num_format)
-                    continue
-            except (TypeError, UnicodeEncodeError):
-                pass
+            if sys.version_info[0] == 2:
+                str_types = basestring
+            else:
+                str_types = str
+
+            # Check if num_format is an index to a built-in number format.
+            if not isinstance(num_format, str_types):
+                xf_format.num_format_index = int(num_format)
+                continue
 
             if num_format in num_formats:
                 # Number xf_format has already been used.
@@ -1218,8 +1239,16 @@ class Workbook(xmlwriter.XMLwriter):
 
     def _write_calc_pr(self):
         # Write the <calcPr> element.
-        attributes = [('calcId', '124519'),
-                      ('fullCalcOnLoad', '1')]
+        attributes = [('calcId', '124519')]
+
+        if self.calc_mode == 'manual':
+            attributes.append(('calcMode', self.calc_mode))
+            attributes.append(('calcOnSave', "0"))
+        elif self.calc_mode == 'autoNoTable':
+            attributes.append(('calcMode', self.calc_mode))
+
+        if self.calc_on_load:
+            attributes.append(('fullCalcOnLoad', '1'))
 
         self._xml_empty_tag('calcPr', attributes)
 

@@ -20,7 +20,7 @@ class TestCompareXLSXFiles(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
 
-        filename = 'image01.xlsx'
+        filename = 'image20.xlsx'
 
         test_dir = 'xlsxwriter/test/comparison/'
         self.image_dir = test_dir + 'images/'
@@ -31,7 +31,9 @@ class TestCompareXLSXFiles(unittest.TestCase):
         self.ignore_elements = {}
 
     def test_create_file(self):
-        """Test the creation of a simple XlsxWriter file with image(s)."""
+        """
+        Test the creation of a simple XlsxWriter file with multiple images.
+        """
         filename = self.got_filename
 
         ####################################################
@@ -39,31 +41,19 @@ class TestCompareXLSXFiles(unittest.TestCase):
         workbook = Workbook(filename)
 
         worksheet = workbook.add_worksheet()
+        # Add second worksheet for internal link
+        workbook.add_worksheet()
 
-        worksheet.insert_image('E9', self.image_dir + 'red.png')
+        # External link
+        options = {'url': 'https://www.github.com'}
+        worksheet.insert_image('C2', self.image_dir + 'train.jpg', options)
 
-        workbook.close()
+        options = {'url': 'external:./subdir/blank.xlsx'}
+        worksheet.insert_image('C30', self.image_dir + 'train.jpg', options)
 
-        ####################################################
-
-        got, exp = _compare_xlsx_files(self.got_filename,
-                                       self.exp_filename,
-                                       self.ignore_files,
-                                       self.ignore_elements)
-
-        self.assertEqual(got, exp)
-
-    def test_create_file_in_memory(self):
-        """Test the creation of a simple XlsxWriter file with image(s)."""
-        filename = self.got_filename
-
-        ####################################################
-
-        workbook = Workbook(filename, {'in_memory': True})
-
-        worksheet = workbook.add_worksheet()
-
-        worksheet.insert_image('E9', self.image_dir + 'red.png')
+        # Internal link
+        options = {'url': 'internal:Sheet2!A1'}
+        worksheet.insert_image('C60', self.image_dir + 'train.jpg', options)
 
         workbook.close()
 
